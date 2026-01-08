@@ -1492,6 +1492,8 @@ function genera_pdf_movimiento_inv_formato_salida($payload = array())
     $oReturn = new xajaxResponse();
 
     try {
+        global $DSN_Ifx;
+
         if (empty($payload) || !is_array($payload)) {
             $oReturn->alert('No existen datos para generar el reporte.');
             $oReturn->script("console.error('Payload vacío o inválido para generar el reporte.');");
@@ -1505,6 +1507,23 @@ function genera_pdf_movimiento_inv_formato_salida($payload = array())
                 $oReturn->script("console.error('Falta clave requerida en payload: " . $key . "');");
                 return $oReturn;
             }
+        }
+
+        $oIfx = new Dbo;
+        $oIfx->DSN = $DSN_Ifx;
+        $oIfx->Conectar();
+
+        $sql_moneda = "select minv_cod_mone from saeminv where
+            minv_cod_empr = " . $payload['empresa'] . " and
+            minv_cod_sucu = " . $payload['sucursal'] . " and
+            minv_num_comp = " . $payload['serial'] . " and
+            minv_cod_tran = '" . $payload['tran'] . "'";
+        $minv_cod_mone = consulta_string_func($sql_moneda, 'minv_cod_mone', $oIfx, '');
+
+        if (empty($minv_cod_mone)) {
+            $oReturn->alert('No existe moneda asociada al movimiento.');
+            $oReturn->script("console.error('Movimiento sin moneda (minv_cod_mone) en saeminv.');");
+            return $oReturn;
         }
 
         $pdf = generar_mov_inv_pdf(
