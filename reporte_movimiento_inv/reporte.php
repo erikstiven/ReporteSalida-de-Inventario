@@ -208,7 +208,18 @@
                 empresa: empr,
                 sucursal: sucu
             };
-            xajax_genera_pdf_movimiento_inv(payload);
+            console.log('Payload impresion movimiento (formato salida):', payload);
+            if (!payload.serial || !payload.empresa || !payload.sucursal || !payload.tran) {
+                alert('Datos incompletos para generar el reporte.');
+                console.error('Payload incompleto para generar el reporte:', payload);
+                return;
+            }
+            if (typeof xajax_genera_pdf_movimiento_inv_formato_salida !== 'function') {
+                alert('No se puede generar el reporte en este momento.');
+                console.error('xajax_genera_pdf_movimiento_inv_formato_salida no disponible.');
+                return;
+            }
+            xajax_genera_pdf_movimiento_inv_formato_salida(payload);
         }
 
         function generar_pdf_movimiento_inv() {

@@ -1483,6 +1483,59 @@ function genera_pdf_movimiento_inv($payload = array())
     }
 }
 
+function genera_pdf_movimiento_inv_formato_salida($payload = array())
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    $oReturn = new xajaxResponse();
+
+    try {
+        if (empty($payload) || !is_array($payload)) {
+            $oReturn->alert('No existen datos para generar el reporte.');
+            $oReturn->script("console.error('Payload vacío o inválido para generar el reporte.');");
+            return $oReturn;
+        }
+
+        $required = array('serial', 'empresa', 'sucursal', 'tran');
+        foreach ($required as $key) {
+            if (!isset($payload[$key]) || $payload[$key] === '') {
+                $oReturn->alert('Datos incompletos para generar el reporte. Falta: ' . $key);
+                $oReturn->script("console.error('Falta clave requerida en payload: " . $key . "');");
+                return $oReturn;
+            }
+        }
+
+        $pdf = generar_mov_inv_pdf(
+            $payload['empresa'],
+            $payload['sucursal'],
+            $payload['serial'],
+            $payload['tran'],
+            0,
+            0
+        );
+
+        if (empty($pdf)) {
+            $oReturn->alert('No existen datos para generar el reporte.');
+            $oReturn->script("console.error('No se generó contenido para el reporte del movimiento.');");
+            return $oReturn;
+        }
+
+        unset($_SESSION['pdf']);
+        $_SESSION['pdf'] = $pdf;
+
+        $oReturn->script('generar_pdf_movimiento_inv()');
+        return $oReturn;
+    } catch (Throwable $e) {
+        error_log('Error al generar reporte movimiento: ' . $e->getMessage());
+        error_log($e->getTraceAsString());
+        $oReturn->alert('Error al generar el reporte: ' . $e->getMessage() . ' (' . $e->getFile() . ':' . $e->getLine() . ')');
+        $oReturn->script("console.error('Error al generar el reporte: " . addslashes($e->getMessage()) . " (" . addslashes($e->getFile()) . ":" . $e->getLine() . ")');");
+        return $oReturn;
+    }
+}
+
 
 /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 /* PROCESO DE REQUEST DE LAS FUNCIONES MEDIANTE AJAX NO MODIFICAR */

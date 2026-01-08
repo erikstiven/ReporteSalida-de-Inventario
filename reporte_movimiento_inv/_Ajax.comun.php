@@ -35,6 +35,7 @@ $xajax->registerFunction("genera_formulario_modifica_detalle");
 $xajax->registerFunction("verDiarioContable");
 $xajax->registerFunction("genera_pdf_doc_compras");
 $xajax->registerFunction("genera_pdf_movimiento_inv");
+$xajax->registerFunction("genera_pdf_movimiento_inv_formato_salida");
 $xajax->registerFunction("enviar_etiquetas");
 $xajax->registerFunction("formulario_etiqueta");
 
