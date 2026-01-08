@@ -201,6 +201,16 @@
             window.open(pagina, "", opciones);
         }
 
+        function vista_previa_movimiento(id, tran, empr, sucu) {
+            xajax_genera_pdf_movimiento_inv(id, tran, empr, sucu);
+        }
+
+        function generar_pdf_movimiento_inv() {
+            var opciones = "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=no, width=730, height=.370, top=255, left=130";
+            var pagina = '../../Include/documento_pdf3.php?sesionId=<?= session_id() ?>';
+            window.open(pagina, "", opciones);
+        }
+
 
         function vista_previa_totales(id, empr, sucu) {
             var opciones = "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=no, width=730, height=380, top=255, left=130";
