@@ -1,0 +1,52 @@
+<?php
+/* Cosntantes del sistema */
+
+define('SISTEMA_NOMBRE','');
+define('SISTEMA_SIGLAS','');
+define('SISTEMA_NOMBRE_SIMPLE','');
+define('SISTEMA_VERSION','2.6');
+define('SISTEMA_EMPRESA','empresa');
+//define('SISTEMA_CHARSET','ISO-8859-1');
+define('SISTEMA_CHARSET','UTF-8');
+define('DIR_RAIZ','/disco2/www/beloro/');
+define('DIR_FACTELEC','/disco2/www/beloro/WebApp/');
+define('DIR_SISTEMA',DIR_RAIZ.'WebApp/');
+define('DIR_IMAGENES',DIR_SISTEMA.'imagenes/');
+define('DIR_INCLUDE',DIR_SISTEMA.'Include/');
+define('DIR_MODULOS',DIR_SISTEMA.'modulos/');
+define('DIR_EMPRESA',DIR_RAIZ.'archivos/');
+define('DIR_FOTOS',DIR_RAIZ.'archivos/fotos/');
+define('DIR_ARCHIVOS',DIR_SISTEMA.'Include/Clases/Formulario/Plugins/reloj');
+define('DIR_COMPONENTES',DIR_INCLUDE.'Componentes/');
+define('DIR_LIBRERIAS',DIR_INCLUDE.'Librerias/');
+define('APACHE','2.0');
+define('PHP',phpversion());
+define('MYSQL','5.0.51a');
+define('XAMPP','1.6.6');
+define('JIREH_URI',(isset($_SERVER["HTTPS"]) ? "https://" : "http://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
+define('URL_API_CRUZ_ROJA','http://186.4.159.95:8089/');
+define('URL_JIREH_WS','http://api1.sisconti.com7');
+define("URL_JIREH_WS_CORREOS","http://api1.sisconti.com:58123");
+//define('URL_JIREH_WS','http://api1.sisconti.com:45666');
+define('URL_JIREH_DOCUMENTOS','http://api1.sisconti.com:10256');
+define('ZONA_HORARIA','America/Guayaquil');
+date_default_timezone_set('America/Guayaquil');
+
+function path($sDirOp=''){
+    /*
+    $sPath='';
+    $sDir = dirname($_SERVER['PHP_SELF']);
+    $aDir = explode('/', $sDir);
+    for($i=0; $i < (count($aDir)-1) ; $i++)
+        $sPath.='../';
+    if ($sDirOp=='') return $sPath; else return $sPath.$sDirOp;
+    */
+    return $sDirOp;
+}
+
+/*
+if(!is_dir(path(DIR_RAIZ)))
+    die('Upss... El directorio de la aplicaci&oacute;n es incorrecto......');
+*/
+
+?>

@@ -1,0 +1,39 @@
+ÍNDICE DE FICHEROS
+
+Carpeta http: contiene los códigos de ejemplo de la pasarela HTTP. Se trata en general de la pasarela más sencilla de integrar, por tanto la opción recomendable por defecto.	
+
+ - httpPHPAltiria.php: ejemplo de integración en PHP usando la librería CURL.
+ - testAltiriaSms.php: código que llama a la función del archivo httpPHPAltiria.php.
+ - httpPHPAltiriaSoket.php: ejemplo de integración en PHP abriendo directamente un socket sobre la URL del servidor.
+ - HttpJavaAltiria.java: ejemplo de integración en Java usando la librería HttpClient.
+ - Carpeta lib: librerías auxliares necesarias para el ejemplo en Java. Contiene la licencia de uso.
+ - HttpCSWRAltiria.cs: ejemplo de integración en Visual C# usando la librería HttpWebRequest.
+ - HttpCSHCAltiria.cs: ejemplo de integración en Visual C# usando la librería HttpClient.
+ - HttpVBWRAltiria.vb: ejemplo de integración en Visual Basic usando la librería HttpWebRequest.
+ - HttpVBHCAltiria.vb: ejemplo de integración en Visual Basic usando la librería HttpClient.
+ - HttpDelphiAltiria1.dpr: ejemplo de integración en Delphi usando la librería IdHTTP.
+ - HttpDelphiAltiria2.dpr: ejemplo de integración en Delphi usando la librería TnetHTTPClient.
+ - httpPerlAltiria.pl: ejemplo de integración en Perl usando la librería LWP::UserAgent.
+ - httpRubyAltiria.rb: ejemplo de integración en Ruby.
+ - httpPythonAltiria.py: ejemplo de integración en Python usando la librería Requests.
+ - httpNodeAltiria.js: ejemplo de integración en node.js.
+
+Carpeta soap: contiene los códigos de ejemplo de la pasarela de servicios web SOAP.
+
+ - soapPHPAltiria.php: ejemplo de integración en PHP usando la librería NuSOAP (SOAP 1.1).
+ - Carpeta lib: librería NuSOAP necesaria para el ejemplo en php. Contiene la licencia de uso.
+ - SoapJavaAltiria.java: ejemplo de integración en Java para SOAP 1.2.
+ - SoapVBAltiria.vb: ejemplo de integración en Visual Basic para SOAP 1.2.
+ - SoapCSAltiria.cs: ejemplo de integración en Visual C# para SOAP 1.2.
+ - soapRubyAltiria.rb: ejemplo de integración en Ruby usando la librería Savon (SOAP 1.2).
+ - soapPythonAltiria.py: ejemplo de integración en Python usando la librería Suds (SOAP 1.2).
+ - soapPerlAltiria.pl: ejemplo de integración en Perl usando la librería Soap::Lite (SOAP 1.2).
+
+Carpeta rest: contiene los códigos de ejemplo de la pasarela de recursos REST.
+
+ - restPHPAltiria.php: ejemplo de integración en PHP usando la librería CURL.
+ - RestJavaAltiria.java: ejemplo de integración en Java usando la librería HttpClient.
+ - Carpeta lib: librerías auxliares necesarias para el ejemplo en Java. Contiene la licencia de uso.
+ - restPythonAltiria.py: ejemplo de integración en Python usando la librería Requests.
+ - restRubyAltiria.rb: ejemplo de integración en Ruby.
+ - restPerlAltiria.pl: ejemplo de integración en Perl.

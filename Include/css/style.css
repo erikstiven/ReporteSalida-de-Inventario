@@ -1,0 +1,141 @@
+.divResultados {
+  width: 100%;
+  display: none;
+  position: fixed, relative;
+  z-index: 3;
+  margin: 0px;
+  overflow-y: scroll;
+  border-left: 6px solid red;
+  background-color: lightgrey;
+  height: 300px;
+}
+
+.flotante_right {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+  z-index: 1;
+}
+
+/* Contenedor del popup */
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* pop-up actual */
+.popup .popuptext {
+  visibility: hidden;
+  width: 400px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 40%;
+  margin-left: -80px;
+}
+
+/* Muestra del Pop-up*/
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 40%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Cambio para mostrar/ocultar el contenedor del pop-up */
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+/* Animacion del pop-up */
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.input-group-addon.primary {
+  color: rgb(255, 255, 255);
+  background-color: rgb(50, 118, 177);
+  border-color: rgb(40, 94, 142);
+  cursor: pointer;
+}
+.input-group-addon.success {
+  color: rgb(255, 255, 255);
+  background-color: rgb(92, 184, 92);
+  border-color: rgb(76, 174, 76);
+  cursor: pointer;
+}
+.input-group-addon.info {
+  color: rgb(255, 255, 255);
+  background-color: rgb(57, 179, 215);
+  border-color: rgb(38, 154, 188);
+  cursor: pointer;
+}
+.input-group-addon.warning {
+  color: rgb(255, 255, 255);
+  background-color: rgb(240, 173, 78);
+  border-color: rgb(238, 162, 54);
+  cursor: pointer;
+}
+.input-group-addon.danger {
+  color: rgb(255, 255, 255);
+  background-color: rgb(217, 83, 79);
+  border-color: rgb(212, 63, 58);
+  cursor: pointer;
+}
+
+.form-control.min {
+  text-transform: none;
+}
+
+#WindowLoad {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 3200;
+  filter: alpha(opacity=65);
+  -moz-opacity: 65;
+  opacity: 0.65;
+  background: #999;
+}
+
+.form-control{
+  text-transform: uppercase;
+}
+
+
+.flotante {
+  display:scroll;
+  position:fixed;
+  bottom:320px;
+  right:0px;
+}
+
+.text-sys{
+  font-size: 15px;
+}

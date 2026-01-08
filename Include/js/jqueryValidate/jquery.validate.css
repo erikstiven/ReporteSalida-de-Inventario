@@ -1,0 +1,18 @@
+input.error {
+  border: 1px solid red;
+}
+label.error {
+  color: red;
+}
+.selectize-input label.error {
+  position: absolute;
+  text-align: center;
+  /* width: 0; */
+  left: 0px;
+  background-color: white;
+  width: 100%;
+  text-transform: capitalize;
+  font-size: 12px;
+  z-index: 100;
+  cursor: pointer;
+}

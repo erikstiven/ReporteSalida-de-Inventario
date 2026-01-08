@@ -1,0 +1,27 @@
+/********** CSS theme file for CalendarXP 5.0 (Totally configurable) ********/
+/* control the style of the calendar cells */
+.CalHead {cursor:default; text-align:center; font:bold 10pt sans-serif; color:white;}
+.CalCell {cursor:hand; text-align:center;}
+.CellAnchor {text-decoration:none; font:9pt sans-serif;}
+
+/* control the style of the week-counter column */
+.WeekHead {cursor:default; font:9pt sans-serif; text-align:center; color:#ddddea;}
+.WeekCol {cursor:default; font:bold 9pt sans-serif; text-align:center; color:gray; background-color:#ddddea;}
+
+/* styles for the month navigators at the top */
+.MonthNav {vertical-align:middle; height:22; width:18; font:10pt fixedsys; color:black;}
+
+/* styles for the 3 calendar portions (actually 3 table TDs) */
+.CalTop {text-align:center;}
+.CalMiddle {}
+.CalBottom {text-align:center;}
+
+/* styles for the title at the top */
+.CalTitle {vertical-align:middle; font:10pt sans-serif; color:black;}
+
+/* other classes */
+.Today {text-decoration:none; font:bold 10pt sans-serif; color:white;}
+A.Today:hover {color:yellow}
+A.Today:active {color:red}
+
+

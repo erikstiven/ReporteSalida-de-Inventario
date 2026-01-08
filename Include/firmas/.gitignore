@@ -1,0 +1,17 @@
+
+# netbeans project files
+nbproject
+
+# netbeans project files
+.idea
+
+
+# zend studio for eclipse project files
+.buildpath
+.project
+.settings
+
+# config
+WebApp/Include/firmas/contratos
+WebApp/Include/firmas/qr
+

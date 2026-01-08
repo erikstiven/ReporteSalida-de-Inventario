@@ -1,0 +1,198 @@
+.error_form_control{
+    border-color: #dd4b39 !important;
+}
+
+.CampoErrorFormulario{
+margin: 1px;
+padding: 0.1em;
+color: #FF0000;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 0.99em;
+font-weight: bold;
+background-color: #FFFFFF;
+border-bottom: 1px double #FF0000;
+border-left: 1px solid #28759D;
+border-top: 1px solid #28759D;
+border-right: 1px solid #7BBBDD;
+}
+
+.CampoFormulario{
+margin: 1px;
+padding: 0.1em;
+color: #000066;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 1.2em;
+//font-size: 20px;
+font-weight: bold;
+background-color: #FFFFFF;
+border-bottom: 1px solid #7BBBDD;
+border-left: 1px solid #28759D;
+border-top: 1px solid #28759D;
+border-right: 1px solid #7BBBDD;
+}
+
+.CampoFormulario_Rojo{
+margin: 1px;
+padding: 0.1em;
+color: red;
+font-family: Arial, Helvetica, sans-serif;
+/*font-size: 0.99em;*/
+font-size: 15px;
+font-weight: bold;
+background-color: #FFFFFF;
+border-bottom: 1px solid #7BBBDD;
+border-left: 1px solid #28759D;
+border-top: 1px solid #28759D;
+border-right: 1px solid #7BBBDD;
+}
+
+.centrado{
+height:	0 auto;
+width: 0 auto;
+margin: 0 auto;
+visibility:	inherit;
+border:1px solid #000000;
+}
+
+.BotonFormulario{
+background: #E8E8E8;
+color: #006666;
+font-family : Arial, Helvetica, sans-serif;
+font-size : 10px;
+font-weight: bold;
+/*text-transform : uppercase;*/
+text-align : center;
+border-bottom: 1px double #7BBBDD;
+border-left: 1px double #28759D;
+border-top: 1px double #28759D;
+border-right: 1px double #7BBBDD;
+width: auto;
+}
+
+.BotonFormularioActivo{
+background: #E8E8E8;
+color: #0066FF;
+font-family: Arial, Helvetica, sans-serif;
+font-size : 10px;
+font-weight: bold;
+/*text-transform : uppercase;*/
+text-align : center;
+border-top: 1px double #7BBBDD;
+border-right: 1px double #28759D;
+border-bottom: 1px double #28759D;
+border-left: 1px double #7BBBDD;
+width: auto;
+}
+
+
+/* ESTILO DEL BOTON DEL PRIMER INDEX*-- CUANDO ESTA EN SU ESTADO NATURAL */
+.BotonFormularioEstilo{ 
+background-image:url(/Proyecto_Badent/WebApp/imagenes/fondo.jpg);
+color: #333;
+font-family: Tahoma;
+font-size : 11px;
+font-weight: bold;
+text-align : center;
+border-bottom: 1px double #7BBBDD;
+border-left: 1px double #28759D;
+border-top: 1px double #28759D;
+border-right: 1px double #7BBBDD;
+width: auto;
+height:2.2em;
+}
+
+
+/* ESTILO DEL BOTON DEL PRIMER INDEX*-- CUANDO PASA EL MOUSE POR EL BOTON */
+.BotonFormularioActivoEstilo{   
+background-image:url(/Proyecto_Badent/WebApp/imagenes/1021.jpg);
+color: #FFFFFF;
+font-family: Tahoma;
+font-size : 11px;
+font-weight: bold;
+text-align : center;
+border-top: 1px double #7BBBDD;
+border-right: 1px double #28759D;
+border-bottom: 1px double #28759D;
+border-left: 1px double #7BBBDD;
+width: auto;
+height:2.2em;
+}
+
+
+.Hand {
+cursor:"hand";
+}
+
+.Rojo{
+color: #FF0000;
+}
+
+.CampoError{
+color: #FF0000;
+border: none;
+background-color : #C6C6C6;
+font-family : Arial, Helvetica, sans-serif;
+font-size : 12px;
+width: auto;
+}
+
+.TextoValidar {
+font-family: Arial, Helvetica, sans-serif;
+font-size: 1px;
+text-decoration: none;
+}
+.CampoEtiqueta{
+color: red;
+font-family : Arial, Helvetica, sans-serif;
+font-size : 12px;	
+font-weight : bold;
+}
+
+.CampoSeleccionado{
+color: #000000;
+border: 2px solid #800517;
+font-family : Arial, Helvetica, sans-serif;
+font-size : 12px;	
+background-color:#000000;
+}
+
+.celdaLabel {
+moz-border-radius: 15px;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 0.9em;
+font-weight:bold;
+color: #000033;
+}
+
+.celdaInput {
+}
+
+.thFormulario{
+background-color: #FFCC00;
+color : Black;
+font-size : 11px;
+font-weight : bold;
+text-transform : uppercase;
+text-align : center;
+}
+
+div#contenedor{
+width: 35em;
+padding: 10px;
+margin:0 auto;
+background:#E6E6E6;
+color:#000
+}
+
+div#titulo{
+font-family: Arial, Helvetica, sans-serif;
+font-size: 0.99em;
+font-weight: bold;
+text-shadow:#CCCCCC;
+text-transform:uppercase;
+width: 24em;
+padding: 5px;
+margin:0 auto;
+background: #666666;
+color:#FFF
+}
