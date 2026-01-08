@@ -1513,12 +1513,18 @@ function genera_pdf_movimiento_inv_formato_salida($payload = array())
         $oIfx->DSN = $DSN_Ifx;
         $oIfx->Conectar();
 
-        $sql_moneda = "select minv_cod_mone from saeminv where
+        $sql_moneda = "select minv_cod_mone, minv_cod_tran from saeminv where
             minv_cod_empr = " . $payload['empresa'] . " and
             minv_cod_sucu = " . $payload['sucursal'] . " and
-            minv_num_comp = " . $payload['serial'] . " and
-            minv_cod_tran = '" . $payload['tran'] . "'";
+            minv_num_comp = " . $payload['serial'];
         $minv_cod_mone = consulta_string_func($sql_moneda, 'minv_cod_mone', $oIfx, '');
+        $tran_cod = consulta_string_func($sql_moneda, 'minv_cod_tran', $oIfx, '');
+
+        if (empty($tran_cod)) {
+            $oReturn->alert('No existe transacción asociada al movimiento.');
+            $oReturn->script("console.error('Movimiento sin transacción (minv_cod_tran) en saeminv.');");
+            return $oReturn;
+        }
 
         if (empty($minv_cod_mone)) {
             $oReturn->alert('No existe moneda asociada al movimiento.');
@@ -1530,7 +1536,7 @@ function genera_pdf_movimiento_inv_formato_salida($payload = array())
             $payload['empresa'],
             $payload['sucursal'],
             $payload['serial'],
-            $payload['tran'],
+            $tran_cod,
             0,
             0
         );
