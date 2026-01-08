@@ -1440,41 +1440,47 @@ function genera_pdf_movimiento_inv($payload = array())
 
     $oReturn = new xajaxResponse();
 
-    if (empty($payload) || !is_array($payload)) {
-        $oReturn->alert('No existen datos para generar el reporte.');
-        $oReturn->script("console.error('Payload vacío o inválido para generar el reporte.');");
-        return $oReturn;
-    }
-
-    $required = array('serial', 'empresa', 'sucursal', 'tran');
-    foreach ($required as $key) {
-        if (!isset($payload[$key]) || $payload[$key] === '') {
-            $oReturn->alert('Datos incompletos para generar el reporte. Falta: ' . $key);
-            $oReturn->script("console.error('Falta clave requerida en payload: " . $key . "');");
+    try {
+        if (empty($payload) || !is_array($payload)) {
+            $oReturn->alert('No existen datos para generar el reporte.');
+            $oReturn->script("console.error('Payload vacío o inválido para generar el reporte.');");
             return $oReturn;
         }
-    }
 
-    $pdf = generar_mov_inv_pdf(
-        $payload['empresa'],
-        $payload['sucursal'],
-        $payload['serial'],
-        $payload['tran'],
-        0,
-        0
-    );
+        $required = array('serial', 'empresa', 'sucursal', 'tran');
+        foreach ($required as $key) {
+            if (!isset($payload[$key]) || $payload[$key] === '') {
+                $oReturn->alert('Datos incompletos para generar el reporte. Falta: ' . $key);
+                $oReturn->script("console.error('Falta clave requerida en payload: " . $key . "');");
+                return $oReturn;
+            }
+        }
 
-    if (empty($pdf)) {
-        $oReturn->alert('No existen datos para generar el reporte.');
-        $oReturn->script("console.error('No se generó contenido para el reporte del movimiento.');");
+        $pdf = generar_mov_inv_pdf(
+            $payload['empresa'],
+            $payload['sucursal'],
+            $payload['serial'],
+            $payload['tran'],
+            0,
+            0
+        );
+
+        if (empty($pdf)) {
+            $oReturn->alert('No existen datos para generar el reporte.');
+            $oReturn->script("console.error('No se generó contenido para el reporte del movimiento.');");
+            return $oReturn;
+        }
+
+        unset($_SESSION['pdf']);
+        $_SESSION['pdf'] = $pdf;
+
+        $oReturn->script('generar_pdf_movimiento_inv()');
+        return $oReturn;
+    } catch (Exception $e) {
+        $oReturn->alert('Error al generar el reporte: ' . $e->getMessage());
+        $oReturn->script("console.error('Error al generar el reporte: " . addslashes($e->getMessage()) . "');");
         return $oReturn;
     }
-
-    unset($_SESSION['pdf']);
-    $_SESSION['pdf'] = $pdf;
-
-    $oReturn->script('generar_pdf_movimiento_inv()');
-    return $oReturn;
 }
 
 
