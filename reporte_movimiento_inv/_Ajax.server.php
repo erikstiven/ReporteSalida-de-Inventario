@@ -1432,26 +1432,26 @@ function genera_pdf_doc_compras($idempresa, $idsucursal, $asto_cod, $ejer_cod, $
     return $oReturn;
 }
 
-function generar_movimiento_inv_pdf($idempresa = "", $idsucursal = "", $minv_num_comp = "", $tran_cod = '', $ejer_cod = "", $prdo_cod = "")
+function generar_movimiento_payload($idempresa = "", $idsucursal = "", $minv_num_comp = "", $tran_cod = '', $ejer_cod = "", $prdo_cod = "")
 {
     global $DSN_Ifx, $DSN;
-
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-    }
 
     $oIfx = new Dbo;
     $oIfx->DSN = $DSN_Ifx;
     $oIfx->Conectar();
 
-    $oIfx2 = new Dbo;
-    $oIfx2->DSN = $DSN_Ifx;
-    $oIfx2->Conectar();
+    $oIfxA = new Dbo();
+    $oIfxA->DSN = $DSN_Ifx;
+    $oIfxA->Conectar();
 
     $class = new GeneraDetalleInventario();
 
     $arrayMinv = $class->generaSaeminv($oIfx, $idempresa, $idsucursal, $ejer_cod, $prdo_cod, $tran_cod, $minv_num_comp);
     $arrayDmov = $class->generaSaedmov($oIfx, $idempresa, $idsucursal, $ejer_cod, $prdo_cod, $minv_num_comp);
+
+    if (count($arrayMinv) === 0) {
+        return array();
+    }
 
     foreach ($arrayMinv as $val) {
         $minv_num_sec = $val[0];
@@ -1497,9 +1497,6 @@ function generar_movimiento_inv_pdf($idempresa = "", $idsucursal = "", $minv_num
         $tran_nom_tran = $oIfx->f('tran_des_tran');
     }
 
-    $oIfx->Free();
-    setlocale(LC_ALL, "es_ES@euro", "es_ES", "esp");
-
     if (empty($minv_cod_clpv)) {
         $proveedorcliente = '';
     } else {
@@ -1512,44 +1509,125 @@ function generar_movimiento_inv_pdf($idempresa = "", $idsucursal = "", $minv_num
 
     $sql = "select mone_des_mone from saemone where mone_cod_empr = $idempresa and mone_cod_mone = $minv_cod_mone ";
     $moneda = consulta_string_func($sql, 'mone_des_mone', $oIfx, 0);
-    $minv_fmov = str_replace('/', '', $minv_fmov);
 
+    $detalle = array();
+    $cantidad_total_ad = 0;
+    $costo_total_ad = 0;
+    foreach ($arrayDmov as $val) {
+        $dmov_cod_prod = $val[0];
+        $dmov_cod_bode = $val[1];
+        $dmov_bod_envi = $val[2];
+        $dmov_cod_ccos = $val[3];
+        $dmov_cod_cuen = $val[4];
+        $dmov_can_dmov = $val[5];
+        $dmov_cun_dmov = $val[6];
+        $dmov_cto_dmov = $val[7];
+        $dmov_cad_lote = $val[8];
+        $dmov_ela_lote = $val[9];
+        $dmov_cod_lote = $val[10];
+        $dmov_prec_vent = $val[11];
+
+        if (empty($dmov_prec_vent)) {
+            $dmov_prec_vent = 0;
+        }
+
+        if ($dmov_cun_dmov < 0.01) {
+            $dmov_cun_dmov = $dmov_prec_vent;
+        }
+
+        $sql = "SELECT prod_nom_prod, prbo_uco_prod, prbo_cod_unid, unid_nom_unid
+                            from saeprod, saeprbo, saeunid 
+                            where 
+                            prbo_cod_prod = prod_cod_prod and 
+                            prbo_cod_unid = unid_cod_unid and 
+                            prod_cod_prod = '$dmov_cod_prod' and
+                            prbo_cod_bode = $dmov_cod_bode
+                            ";
+        $prod_nom = consulta_string_func($sql, 'prod_nom_prod', $oIfx, '');
+        $prod_unid = consulta_string_func($sql, 'unid_nom_unid', $oIfx, '');
+
+        $sql = "select bode_nom_bode from saebode where bode_cod_empr = $idempresa and bode_cod_bode = '$dmov_cod_bode' ";
+        $bode_nom = consulta_string_func($sql, 'bode_nom_bode', $oIfx, '');
+
+        $sql = "select prod_cod_barra from saeprod where prod_cod_empr = $idempresa and prod_cod_sucu = $idsucursal and prod_cod_prod = '$dmov_cod_prod' ";
+        $prod_cod_barra = consulta_string_func($sql, 'prod_cod_barra', $oIfx, '');
+
+        $sql = "select prbo_dis_prod from saeprbo where prbo_cod_empr = $idempresa and prbo_cod_sucu = $idsucursal and prbo_cod_prod = '$dmov_cod_prod' ";
+        $prbo_dis_prod = consulta_string_func($sql, 'prbo_dis_prod', $oIfx, '0');
+
+        $detalle[] = array(
+            'bodega' => $bode_nom,
+            'codigo' => $dmov_cod_prod,
+            'producto' => $prod_nom,
+            'unidad' => $prod_unid,
+            'cantidad' => $dmov_can_dmov,
+            'costo_unitario' => $dmov_cun_dmov,
+            'total' => $dmov_cto_dmov
+        );
+
+        $cantidad_total_ad += $dmov_can_dmov;
+        $costo_total_ad += $dmov_cto_dmov;
+    }
+
+    return array(
+        'serial' => $minv_num_comp,
+        'empresa' => $idempresa,
+        'sucursal' => $idsucursal,
+        'tran' => $tran_cod,
+        'empresa_nombre' => $empr_nom,
+        'empresa_direccion' => $empr_dir,
+        'sucursal_nombre' => $sucu_nom,
+        'movimiento_nombre' => $tran_nom_tran,
+        'numero_sec' => $minv_num_sec,
+        'cliente_nombre' => $proveedorcliente,
+        'fecha_pedido' => $minv_fmov,
+        'detalle_texto' => $minv_cm1_minv,
+        'detalle' => $detalle,
+        'total_fac' => ($minv_tot_minv + $minv_iva_valo),
+        'total_cantidad' => $cantidad_total_ad,
+        'total_costo' => $costo_total_ad,
+        'usuario_nombre' => $usuario_nombre
+    );
+}
+
+function render_movimiento_payload_pdf($data = array())
+{
+    $html = '';
+
+    $minv_fmov = $data['fecha_pedido'];
     $html .= '<table style="margin-left:50px; margin-right:0px; margin-top:10px">
 				<tr >
-					<td style="font-size:18px; text-align: left">' . $empr_nom . '<br></td>
+					<td style="font-size:18px; text-align: left">' . $data['empresa_nombre'] . '<br></td>
 
 				</tr>
 				<tr>
-					<td  style="font-size:14px; text-align: left">SUCURSAL:' . $sucu_nom . '<br></td>
+					<td  style="font-size:14px; text-align: left">SUCURSAL:' . $data['sucursal_nombre'] . '<br></td>
 				</tr>
 				<tr>
-					<td  style="font-size:14px; text-align: left">DIRECCION:' . $empr_dir . '<br><br></td>
+					<td  style="font-size:14px; text-align: left">DIRECCION:' . $data['empresa_direccion'] . '<br><br></td>
 				</tr>
-				<!-- <tr>
-					<td style="font-size:18px; text-align: right">N.- MOVIMIENTO  ' . $tran_nom_tran . ' No:<strong>' . $minv_num_sec . '</strong><br><br><br></td>
-				</tr> -->
 			</table>
 
             <table  style="margin-left:40px; width:90%;border:0px solid black; margin-top:10px" align="center">
                 <tr>
-                    <td  style="font-size:20px; text-align: center; border-bottom:0px solid ">N.- MOVIMIENTO ' . $tran_nom_tran . ' No: <strong>' . $minv_num_sec . '</strong><br><br></td>
+                    <td  style="font-size:20px; text-align: center; border-bottom:0px solid ">N.- MOVIMIENTO ' . $data['movimiento_nombre'] . ' No: <strong>' . $data['numero_sec'] . '</strong><br><br></td>
                 </tr>            
 			</table>
 			<table border="0" style="width: 90%; margin-left:50px; margin-top:10px;">
 				<tr>
-					<td  style="width: 50%;font-size:18px; text-align: left">PROVEEDOR: <strong>' . $proveedorcliente . '</strong></td> 
+					<td  style="width: 50%;font-size:18px; text-align: left">PROVEEDOR: <strong>' . $data['cliente_nombre'] . '</strong></td> 
 					<td  style="width: 50%;font-size:16px; text-align: right">Fecha: <strong>' . $minv_fmov . '</strong></td>
 				</tr>
 			</table>
 
             <table border="0" style="width: 90%; margin-left:50px; margin-top:10px;">
 				<tr>
-                    <td style="width: 70%; font-size:16px; text-align: left">Detalle: ' . $minv_cm1_minv . '</td>
-					<td  style="width: 30%; font-size:16px; text-align: right">Monto: <strong>' . number_format(($minv_tot_minv + $minv_iva_valo), 2, '.', ',') . '</strong></td>
+                    <td style="width: 70%; font-size:16px; text-align: left">Detalle: ' . $data['detalle_texto'] . '</td>
+					<td  style="width: 30%; font-size:16px; text-align: right">Monto: <strong>' . number_format($data['total_fac'], 2, '.', ',') . '</strong></td>
 				</tr>			
 			</table>';
 
-    if (count($arrayDmov) > 0) {
+    if (count($data['detalle']) > 0) {
         $html .= '
 								<table  style="margin-left:40px; width:90%;border:1px solid black; border-radius: 5px; margin-top:10px" align="left">
 									<tr>
@@ -1559,9 +1637,7 @@ function generar_movimiento_inv_pdf($idempresa = "", $idsucursal = "", $minv_num
 										<td  style="width:3%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid ">N</td>
 										<td  style="width:15%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid">BODEGA</td>
 										<td  style="width:18%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid">CODIGO</td>
-										<!-- <td  style="width:8%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid">CODIGO BARRAS</td> -->
 										<td  style="width:27%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid">PRODUCTO</td>
-										<!-- <td  style="width:10%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid">LOTE/SERIE</td> -->
 										<td  style="width:8%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid">UNIDAD MEDIDA</td>
 										<td  style="width:10%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid">CANT.</td>
 										<td  style="width:10%;font-size:14px; text-align: center; border-right:1px solid; border-bottom:1px solid">C.UNITARIO</td>
@@ -1569,79 +1645,32 @@ function generar_movimiento_inv_pdf($idempresa = "", $idsucursal = "", $minv_num
 									</tr>';
 
         $i = 1;
-        $cantidad_total_ad = 0;
-        $costo_total_ad = 0;
-        foreach ($arrayDmov as $val) {
-            $dmov_cod_prod = $val[0];
-            $dmov_cod_bode = $val[1];
-            $dmov_bod_envi = $val[2];
-            $dmov_cod_ccos = $val[3];
-            $dmov_cod_cuen = $val[4];
-            $dmov_can_dmov = $val[5];
-            $dmov_cun_dmov = $val[6];
-            $dmov_cto_dmov = $val[7];
-            $dmov_cad_lote = $val[8];
-            $dmov_ela_lote = $val[9];
-            $dmov_cod_lote = $val[10];
-            $dmov_prec_vent = $val[11];
-
-            if (empty($dmov_prec_vent)) {
-                $dmov_prec_vent = 0;
-            }
-
-            if ($dmov_cun_dmov < 0.01) {
-                $dmov_cun_dmov = $dmov_prec_vent;
-            }
-
-            $sql = "SELECT prod_nom_prod, prbo_uco_prod, prbo_cod_unid, unid_nom_unid
-                            from saeprod, saeprbo, saeunid 
-                            where 
-                            prbo_cod_prod = prod_cod_prod and 
-                            prbo_cod_unid = unid_cod_unid and 
-                            prod_cod_prod = '$dmov_cod_prod' and
-                            prbo_cod_bode = $dmov_cod_bode
-                            ";
-            $prod_nom = consulta_string_func($sql, 'prod_nom_prod', $oIfx, '');
-            $prod_unid = consulta_string_func($sql, 'unid_nom_unid', $oIfx, '');
-
-            $sql = "select bode_nom_bode from saebode where bode_cod_empr = $idempresa and bode_cod_bode = '$dmov_cod_bode' ";
-            $bode_nom = consulta_string_func($sql, 'bode_nom_bode', $oIfx, '');
-
-            $sql = "select prod_cod_barra from saeprod where prod_cod_empr = $idempresa and prod_cod_sucu = $idsucursal and prod_cod_prod = '$dmov_cod_prod' ";
-            $prod_cod_barra = consulta_string_func($sql, 'prod_cod_barra', $oIfx, '');
-
-            $sql = "select prbo_dis_prod from saeprbo where prbo_cod_empr = $idempresa and prbo_cod_sucu = $idsucursal and prbo_cod_prod = '$dmov_cod_prod' ";
-            $prbo_dis_prod = consulta_string_func($sql, 'prbo_dis_prod', $oIfx, '0');
-
+        foreach ($data['detalle'] as $detalle) {
             $html .= '<tr>';
             $html .= '<td style="width:3%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid ">' . $i . '</td>';
-            $html .= '<td style="width:15%;font-size:12px; text-align: left; border-right:1px solid; border-bottom:1px solid">' . $bode_nom . '</td>';
-            $html .= '<td style="width:18%;font-size:12px; text-align: left; border-right:1px solid; border-bottom:1px solid ">' . $dmov_cod_prod . '</td>';
-            $html .= '<td style="width:27%;font-size:12px; text-align: left; border-right:1px solid; border-bottom:1px solid ">' . $prod_nom . '</td>';
-            $html .= '<td style="width:8%;font-size:12px; text-align: left; border-right:1px solid; border-bottom:1px solid ">' . $prod_unid . '</td>';
-            $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid" align="right">' . round($dmov_can_dmov, 2) . '</td>';
-            $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid">' . number_format($dmov_cun_dmov, 2) . '</td>';
-            $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid">' . number_format($dmov_cto_dmov, 2) . '</td>';
+            $html .= '<td style="width:15%;font-size:12px; text-align: left; border-right:1px solid; border-bottom:1px solid">' . $detalle['bodega'] . '</td>';
+            $html .= '<td style="width:18%;font-size:12px; text-align: left; border-right:1px solid; border-bottom:1px solid ">' . $detalle['codigo'] . '</td>';
+            $html .= '<td style="width:27%;font-size:12px; text-align: left; border-right:1px solid; border-bottom:1px solid ">' . $detalle['producto'] . '</td>';
+            $html .= '<td style="width:8%;font-size:12px; text-align: left; border-right:1px solid; border-bottom:1px solid ">' . $detalle['unidad'] . '</td>';
+            $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid" align="right">' . round($detalle['cantidad'], 2) . '</td>';
+            $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid">' . number_format($detalle['costo_unitario'], 2) . '</td>';
+            $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid">' . number_format($detalle['total'], 2) . '</td>';
             $html .= '</tr>';
-
-            $cantidad_total_ad += $dmov_can_dmov;
-            $costo_total_ad += $dmov_cto_dmov;
-
             $i++;
         }
 
         $html .= '<tr>';
         $html .= '<td style="width:3%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid" colspan="5">TOTALES</td>';
-        $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid" align="right">' . round($cantidad_total_ad, 2) . '</td>';
+        $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid" align="right">' . round($data['total_cantidad'], 2) . '</td>';
         $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid"></td>';
-        $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid">' . number_format($costo_total_ad, 2) . '</td>';
+        $html .= '<td style="width:10%;font-size:12px; text-align: right; border-right:1px solid; border-bottom:1px solid">' . number_format($data['total_costo'], 2) . '</td>';
         $html .= '</tr>';
 
         $html .= '</table>';
         $html .= '<br><br><br><br><br><br>';
         $html .= '<table  style="margin-left:15px; width:90%;border:0px solid black; border-radius: 5px; margin-top:10px" align="center">';
         $html .= '<tr>
-						<td style="font-size:16px; text-align: center;border-top : 1px; width:24%;">Elaborado por:<br> ' . $usuario_nombre . '</td>	
+						<td style="font-size:16px; text-align: center;border-top : 1px; width:24%;">Elaborado por:<br> ' . $data['usuario_nombre'] . '</td>	
                         <td style="font-size:16px; text-align: center;border-top : 1px; width:24%;">Despachado por:</td>
 					    <td style="font-size:16px; text-align: center;border-top : 1px; width:24%;">Autorizado por:</td>		
                         <td style="font-size:16px; text-align: center;border-top : 1px; width:24%;">Recibido por:</td>
@@ -1654,25 +1683,69 @@ function generar_movimiento_inv_pdf($idempresa = "", $idsucursal = "", $minv_num
     return $html;
 }
 
-function genera_pdf_movimiento_inv($minv_cod, $tran_cod, $idempresa, $idsucursal)
+function genera_pdf_movimiento_inv($payload = array())
 {
     if (session_status() !== PHP_SESSION_ACTIVE) {
         session_start();
     }
     global $DSN_Ifx;
 
-    $oIfxA = new Dbo();
-    $oIfxA->DSN = $DSN_Ifx;
-    $oIfxA->Conectar();
-
-    $oIfx = new Dbo;
-    $oIfx->DSN = $DSN_Ifx;
-    $oIfx->Conectar();
-    unset($_SESSION['pdf']);
     $oReturn = new xajaxResponse();
 
-    $diario = generar_movimiento_inv_pdf($idempresa, $idsucursal, $minv_cod, $tran_cod, 0, 0);
-    $_SESSION['pdf'] = $diario;
+    if (empty($payload) || !is_array($payload)) {
+        $oReturn->alert('No existen datos para generar el reporte.');
+        $oReturn->script("console.error('Payload vacío o inválido para generar el reporte.');");
+        return $oReturn;
+    }
+
+    $required = array('serial', 'empresa', 'sucursal', 'tran');
+    foreach ($required as $key) {
+        if (!isset($payload[$key]) || $payload[$key] === '') {
+            $oReturn->alert('Datos incompletos para generar el reporte. Falta: ' . $key);
+            $oReturn->script("console.error('Falta clave requerida en payload: " . $key . "');");
+            return $oReturn;
+        }
+    }
+
+    $data = generar_movimiento_payload($payload['empresa'], $payload['sucursal'], $payload['serial'], $payload['tran'], 0, 0);
+
+    if (empty($data)) {
+        $oReturn->alert('No existen datos para generar el reporte.');
+        $oReturn->script("console.error('No se encontraron datos para el movimiento solicitado.');");
+        return $oReturn;
+    }
+
+    if (empty($data['detalle'])) {
+        $oReturn->alert('No existen detalles para generar el reporte.');
+        $oReturn->script("console.error('Detalle vacío en el payload del reporte.');");
+        return $oReturn;
+    }
+
+    $requiredData = array(
+        'serial',
+        'empresa',
+        'sucursal',
+        'cliente_nombre',
+        'fecha_pedido',
+        'detalle',
+        'total_fac',
+        'empresa_nombre',
+        'empresa_direccion',
+        'sucursal_nombre',
+        'movimiento_nombre',
+        'numero_sec'
+    );
+
+    foreach ($requiredData as $key) {
+        if (!isset($data[$key]) || $data[$key] === '') {
+            $oReturn->alert('Datos incompletos para generar el reporte. Falta: ' . $key);
+            $oReturn->script("console.error('Falta clave requerida en payload generado: " . $key . "');");
+            return $oReturn;
+        }
+    }
+
+    unset($_SESSION['pdf']);
+    $_SESSION['pdf'] = render_movimiento_payload_pdf($data);
 
     $oReturn->script('generar_pdf_movimiento_inv()');
     return $oReturn;

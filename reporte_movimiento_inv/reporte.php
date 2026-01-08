@@ -202,7 +202,13 @@
         }
 
         function vista_previa_movimiento(id, tran, empr, sucu) {
-            xajax_genera_pdf_movimiento_inv(id, tran, empr, sucu);
+            var payload = {
+                serial: id,
+                tran: tran,
+                empresa: empr,
+                sucursal: sucu
+            };
+            xajax_genera_pdf_movimiento_inv(payload);
         }
 
         function generar_pdf_movimiento_inv() {
