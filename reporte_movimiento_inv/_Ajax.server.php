@@ -992,6 +992,10 @@ function consultar($aForm = '', $op = '')
                 $sHtml .= '<td align="right">
 								<img src="' . $_COOKIE['JIREH_IMAGENES'] . 'iconos/print.png"
 										style="cursor: hand !important; cursor: pointer !important;"
+										onclick="javascript:vista_previa_movimiento( ' . $minv_cod . ', ' . $minv_cod_tran . ', ' . $empresa . ',  ' . $sucursal . ' );"
+										alt="Imprimir" />
+								<img src="' . $_COOKIE['JIREH_IMAGENES'] . 'iconos/print.png"
+										style="cursor: hand !important; cursor: pointer !important;"
 										onclick="javascript:vista_previa_( ' . $minv_cod . ', ' . $empresa . ',  ' . $sucursal . ' );"
 										alt="Imprimir" />
 								<img src="' . $_COOKIE['JIREH_IMAGENES'] . 'iconos/print.png"
@@ -1426,6 +1430,135 @@ function genera_pdf_doc_compras($idempresa, $idsucursal, $asto_cod, $ejer_cod, $
 
     $oReturn->script('generar_pdf_compras()');
     return $oReturn;
+}
+
+function genera_pdf_movimiento_inv($payload = array())
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    $oReturn = new xajaxResponse();
+
+    try {
+        if (empty($payload) || !is_array($payload)) {
+            $oReturn->alert('No existen datos para generar el reporte.');
+            $oReturn->script("console.error('Payload vacío o inválido para generar el reporte.');");
+            return $oReturn;
+        }
+
+        $required = array('serial', 'empresa', 'sucursal', 'tran');
+        foreach ($required as $key) {
+            if (!isset($payload[$key]) || $payload[$key] === '') {
+                $oReturn->alert('Datos incompletos para generar el reporte. Falta: ' . $key);
+                $oReturn->script("console.error('Falta clave requerida en payload: " . $key . "');");
+                return $oReturn;
+            }
+        }
+
+        $pdf = generar_mov_inv_pdf(
+            $payload['empresa'],
+            $payload['sucursal'],
+            $payload['serial'],
+            $payload['tran'],
+            0,
+            0
+        );
+
+        if (empty($pdf)) {
+            $oReturn->alert('No existen datos para generar el reporte.');
+            $oReturn->script("console.error('No se generó contenido para el reporte del movimiento.');");
+            return $oReturn;
+        }
+
+        unset($_SESSION['pdf']);
+        $_SESSION['pdf'] = $pdf;
+
+        $oReturn->script('generar_pdf_movimiento_inv()');
+        return $oReturn;
+    } catch (Exception $e) {
+        $oReturn->alert('Error al generar el reporte: ' . $e->getMessage());
+        $oReturn->script("console.error('Error al generar el reporte: " . addslashes($e->getMessage()) . "');");
+        return $oReturn;
+    }
+}
+
+function genera_pdf_movimiento_inv_formato_salida($payload = array())
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    $oReturn = new xajaxResponse();
+
+    try {
+        global $DSN_Ifx;
+
+        if (empty($payload) || !is_array($payload)) {
+            $oReturn->alert('No existen datos para generar el reporte.');
+            $oReturn->script("console.error('Payload vacío o inválido para generar el reporte.');");
+            return $oReturn;
+        }
+
+        $required = array('serial', 'empresa', 'sucursal', 'tran');
+        foreach ($required as $key) {
+            if (!isset($payload[$key]) || $payload[$key] === '') {
+                $oReturn->alert('Datos incompletos para generar el reporte. Falta: ' . $key);
+                $oReturn->script("console.error('Falta clave requerida en payload: " . $key . "');");
+                return $oReturn;
+            }
+        }
+
+        $oIfx = new Dbo;
+        $oIfx->DSN = $DSN_Ifx;
+        $oIfx->Conectar();
+
+        $sql_moneda = "select minv_cod_mone, minv_cod_tran from saeminv where
+            minv_cod_empr = " . $payload['empresa'] . " and
+            minv_cod_sucu = " . $payload['sucursal'] . " and
+            minv_num_comp = " . $payload['serial'];
+        $minv_cod_mone = consulta_string_func($sql_moneda, 'minv_cod_mone', $oIfx, '');
+        $tran_cod = consulta_string_func($sql_moneda, 'minv_cod_tran', $oIfx, '');
+
+        if (empty($tran_cod)) {
+            $oReturn->alert('No existe transacción asociada al movimiento.');
+            $oReturn->script("console.error('Movimiento sin transacción (minv_cod_tran) en saeminv.');");
+            return $oReturn;
+        }
+
+        if (empty($minv_cod_mone)) {
+            $oReturn->alert('No existe moneda asociada al movimiento.');
+            $oReturn->script("console.error('Movimiento sin moneda (minv_cod_mone) en saeminv.');");
+            return $oReturn;
+        }
+
+        $pdf = generar_mov_inv_pdf(
+            $payload['empresa'],
+            $payload['sucursal'],
+            $payload['serial'],
+            $tran_cod,
+            0,
+            0
+        );
+
+        if (empty($pdf)) {
+            $oReturn->alert('No existen datos para generar el reporte.');
+            $oReturn->script("console.error('No se generó contenido para el reporte del movimiento.');");
+            return $oReturn;
+        }
+
+        unset($_SESSION['pdf']);
+        $_SESSION['pdf'] = $pdf;
+
+        $oReturn->script('generar_pdf_movimiento_inv()');
+        return $oReturn;
+    } catch (Throwable $e) {
+        error_log('Error al generar reporte movimiento: ' . $e->getMessage());
+        error_log($e->getTraceAsString());
+        $oReturn->alert('Error al generar el reporte: ' . $e->getMessage() . ' (' . $e->getFile() . ':' . $e->getLine() . ')');
+        $oReturn->script("console.error('Error al generar el reporte: " . addslashes($e->getMessage()) . " (" . addslashes($e->getFile()) . ":" . $e->getLine() . ")');");
+        return $oReturn;
+    }
 }
 
 

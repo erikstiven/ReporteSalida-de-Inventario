@@ -201,6 +201,33 @@
             window.open(pagina, "", opciones);
         }
 
+        function vista_previa_movimiento(id, tran, empr, sucu) {
+            var payload = {
+                serial: id,
+                tran: tran,
+                empresa: empr,
+                sucursal: sucu
+            };
+            console.log('Payload impresion movimiento (formato salida):', payload);
+            if (!payload.serial || !payload.empresa || !payload.sucursal || !payload.tran) {
+                alert('Datos incompletos para generar el reporte.');
+                console.error('Payload incompleto para generar el reporte:', payload);
+                return;
+            }
+            if (typeof xajax_genera_pdf_movimiento_inv_formato_salida !== 'function') {
+                alert('No se puede generar el reporte en este momento.');
+                console.error('xajax_genera_pdf_movimiento_inv_formato_salida no disponible.');
+                return;
+            }
+            xajax_genera_pdf_movimiento_inv_formato_salida(payload);
+        }
+
+        function generar_pdf_movimiento_inv() {
+            var opciones = "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=no, width=730, height=.370, top=255, left=130";
+            var pagina = '../../Include/documento_pdf3.php?sesionId=<?= session_id() ?>';
+            window.open(pagina, "", opciones);
+        }
+
 
         function vista_previa_totales(id, empr, sucu) {
             var opciones = "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=no, width=730, height=380, top=255, left=130";
